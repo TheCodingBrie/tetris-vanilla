@@ -1,4 +1,5 @@
 // 1. cleanup code
+// 2. style up
 
 const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
@@ -6,6 +7,7 @@ const context = canvas.getContext("2d");
 context.scale(20, 20);
 
 const lineSweep = () => {
+  let rowCount = 1;
   outer: for (let y = stage.length - 1; y > 0; --y) {
     for (let x = 0; x < stage[y].length; ++x) {
       if (stage[y][x] === 0) {
@@ -14,6 +16,10 @@ const lineSweep = () => {
     }
     const row = stage.splice(y, 1)[0].fill(0);
     stage.unshift(row);
+    ++y;
+    player.score += rowCount * 10;
+    console.log(rowCount);
+    rowCount *= 2;
   }
 };
 
@@ -97,8 +103,9 @@ const createPiece = (type) => {
 };
 
 const player = {
-  pos: { x: 5, y: 0 },
-  tetromino: createPiece("O"),
+  pos: { x: 0, y: 0 },
+  tetromino: null,
+  score: 0,
 };
 
 const playerReset = () => {
@@ -112,6 +119,8 @@ const playerReset = () => {
   if (collide(stage, player)) {
     stage.forEach((row) => row.fill(0));
   }
+  player.score = 0;
+  updateScore();
 };
 
 const stage = createStage(12, 20);
@@ -151,6 +160,7 @@ const playerDrop = () => {
     merge(stage, player);
     playerReset();
     lineSweep();
+    updateScore();
   }
   dropCounter = 0;
 };
@@ -206,6 +216,10 @@ const update = (time = 0) => {
   requestAnimationFrame(update);
 };
 
+const updateScore = () => {
+  document.getElementById("score").innerText = player.score;
+};
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     playerMove(-1);
@@ -220,4 +234,5 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+playerReset();
 update();
